@@ -1,61 +1,54 @@
+import SiteHeader from "./components/SiteHeader.jsx";
+import SiteFooter from "./components/SiteFooter.jsx";
+
+const modules = [
+  { id: "clientes-equipos", number: "01", title: "Clientes y equipos", description: "Consultá la información de clientes y los equipos ingresados al taller.", status: "En preparación" },
+  { id: "turnos", number: "02", title: "Turnos", description: "Organizá las solicitudes de atención y la recepción de equipos.", status: "En preparación" },
+  { id: "reparaciones", number: "03", title: "Reparaciones", description: "Centralizá diagnósticos, presupuestos y seguimiento de los trabajos.", status: "En preparación" }
+];
+
 function App() {
   return (
-    <div className="app">
-      <header className="topbar">
-        <a className="brand" href="/" aria-label="Bahía Fix, inicio">
-          <span className="brand-mark">BF</span>
-          <span>Bahía Fix</span>
-        </a>
-        <span className="prototype-label">Prototipo de gestión</span>
-      </header>
-
+    <div className="app-shell" id="inicio">
+      <SiteHeader />
       <main className="main-content">
-        <section className="welcome-card">
-          <p className="eyebrow">GESTIÓN DE TALLER</p>
-          <h1>Bienvenido a Bahía Fix</h1>
-          <p className="intro">
-            Un espacio para organizar turnos, clientes, equipos y reparaciones
-            de herramientas eléctricas y equipos de combustión.
-          </p>
-          <div className="status">
-            <span className="status-dot" />
-            Prueba
+        <section className="hero-section">
+          <div className="hero-copy">
+            <p className="eyebrow">ADMINISTRACIÓN DE TALLER</p>
+            <h1>El trabajo del taller, <span>mejor organizado.</span></h1>
+            <p className="hero-description">Gestioná clientes, equipos, turnos y reparaciones desde un único espacio de trabajo.</p>
+            <a className="primary-link" href="#modulos">Explorar módulos <span aria-hidden="true">→</span></a>
+          </div>
+          <div className="hero-art" aria-hidden="true">
+            <div className="art-ring art-ring-large" />
+            <div className="art-ring art-ring-small" />
+            <div className="tool-card">
+              <span className="tool-card-label">BAHÍA FIX</span>
+              <span className="tool-card-symbol">BF</span>
+              <span className="tool-card-caption">Gestión integral</span>
+            </div>
+            <div className="floating-chip chip-top"><span className="chip-dot" />Organización</div>
+            <div className="floating-chip chip-bottom">Clientes · Taller · Servicio</div>
           </div>
         </section>
-
-        <section className="module-section" aria-labelledby="modules-title">
+        <section className="modules-section" id="modulos" aria-labelledby="modules-title">
           <div className="section-heading">
-            <p className="eyebrow">MÓDULOS DEL SISTEMA</p>
-            <h2 id="modules-title">Todo organizado en un solo lugar</h2>
+            <div><p className="eyebrow">ESPACIO DE TRABAJO</p><h2 id="modules-title">Módulos principales</h2></div>
+            <p className="section-description">Una estructura clara para acompañar cada etapa del servicio.</p>
           </div>
           <div className="module-grid">
-            <article className="module-card">
-              <span className="module-icon">01</span>
-              <h3>Clientes y equipos</h3>
-              <p>Datos de clientes y herramientas ingresadas al taller.</p>
-              <span className="module-status">Próximamente</span>
-            </article>
-            <article className="module-card">
-              <span className="module-icon">02</span>
-              <h3>Turnos</h3>
-              <p>Organización de solicitudes y recepción de equipos.</p>
-              <span className="module-status">Próximamente</span>
-            </article>
-            <article className="module-card">
-              <span className="module-icon">03</span>
-              <h3>Reparaciones</h3>
-              <p>Diagnósticos, presupuestos y seguimiento del trabajo.</p>
-              <span className="module-status">Próximamente</span>
-            </article>
+            {modules.map((module) => (
+              <article className="module-card" id={module.id} key={module.id}>
+                <div className="module-card-top"><span className="module-number">{module.number}</span><span className="module-arrow" aria-hidden="true">↗</span></div>
+                <h3>{module.title}</h3><p>{module.description}</p>
+                <div className="module-card-bottom"><span className="module-status-dot" /><span>{module.status}</span></div>
+              </article>
+            ))}
           </div>
         </section>
       </main>
-
-      <footer className="footer">
-        <span>Bahía Fix · Proyecto Final</span>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
-
 export default App;
