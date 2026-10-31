@@ -1,10 +1,11 @@
 import SiteHeader from "./components/SiteHeader.jsx";
 import SiteFooter from "./components/SiteFooter.jsx";
+import ClientesEquipos from "./pages/ClientesEquipos.jsx";
 
 const modules = [
-  { id: "clientes-equipos", number: "01", title: "Clientes y equipos", description: "Consultá la información de clientes y los equipos ingresados al taller.", status: "En preparación" },
-  { id: "turnos", number: "02", title: "Turnos", description: "Organizá las solicitudes de atención y la recepción de equipos.", status: "En preparación" },
-  { id: "reparaciones", number: "03", title: "Reparaciones", description: "Centralizá diagnósticos, presupuestos y seguimiento de los trabajos.", status: "En preparación" }
+  { id: "clientes-equipos-card", number: "01", title: "Clientes y equipos", description: "Consultá la información de clientes y los equipos ingresados al taller.", status: "Disponible", href: "#clientes-equipos", available: true },
+  { id: "turnos", number: "02", title: "Turnos", description: "Organizá las solicitudes de atención y la recepción de equipos.", status: "En preparación", href: "#turnos", available: false },
+  { id: "reparaciones", number: "03", title: "Reparaciones", description: "Centralizá diagnósticos, presupuestos y seguimiento de los trabajos.", status: "En preparación", href: "#reparaciones", available: false }
 ];
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
             <div className="floating-chip chip-bottom">Clientes · Taller · Servicio</div>
           </div>
         </section>
+
         <section className="modules-section" id="modulos" aria-labelledby="modules-title">
           <div className="section-heading">
             <div><p className="eyebrow">ESPACIO DE TRABAJO</p><h2 id="modules-title">Módulos principales</h2></div>
@@ -38,17 +40,21 @@ function App() {
           </div>
           <div className="module-grid">
             {modules.map((module) => (
-              <article className="module-card" id={module.id} key={module.id}>
+              <article className={`module-card ${module.available ? "module-card-available" : ""}`} id={module.id} key={module.id}>
                 <div className="module-card-top"><span className="module-number">{module.number}</span><span className="module-arrow" aria-hidden="true">↗</span></div>
                 <h3>{module.title}</h3><p>{module.description}</p>
-                <div className="module-card-bottom"><span className="module-status-dot" /><span>{module.status}</span></div>
+                <div className="module-card-bottom"><span className={`module-status-dot ${module.available ? "module-status-active" : ""}`} /><span>{module.status}</span></div>
+                {module.available && <a className="module-card-action" href={module.href}>Abrir módulo <span aria-hidden="true">→</span></a>}
               </article>
             ))}
           </div>
         </section>
+
+        <ClientesEquipos />
       </main>
       <SiteFooter />
     </div>
   );
 }
+
 export default App;
