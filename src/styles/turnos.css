@@ -1,0 +1,15 @@
+.turnos-section { padding: 58px 0 72px; scroll-margin-top: 28px; }
+.turnos-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 24px; }
+.turnos-heading h2 { margin: 0 0 8px; color: var(--color-text, #1d2939); font-size: clamp(1.65rem, 3vw, 2.15rem); }
+.turnos-heading .section-description { margin: 0; }
+.turnos-panel { background: #fff; border: 1px solid #e5eaf1; border-radius: 18px; padding: 22px; box-shadow: 0 12px 34px rgba(25, 42, 70, .06); }
+.turnos-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 18px; }
+.turnos-search { display: flex; align-items: center; gap: 10px; width: min(100%, 480px); min-height: 44px; padding: 0 13px; border: 1px solid #dce4ee; border-radius: 10px; color: #65758b; }
+.turnos-search input { width: 100%; border: 0; outline: 0; color: #26364b; background: transparent; font: inherit; }
+.turno-state { display: inline-flex; padding: 5px 9px; border-radius: 999px; background: #eef3f8; color: #46566b; font-size: .78rem; font-weight: 700; white-space: nowrap; }
+.turno-state-confirmado { background: #e8f5ed; color: #207346; }
+.turno-state-cancelado { background: #fff0ef; color: #a33b35; }
+.turno-state-atendido { background: #edf0ff; color: #4655a5; }
+.turnos-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.turnos-form-error { grid-column: 1 / -1; }
+@media (max-width: 720px) { .turnos-heading { align-items: flex-start; flex-direction: column; } .turnos-toolbar { align-items: stretch; flex-direction: column; } .turnos-search { width: auto; } .turnos-panel { padding: 14px; } .turnos-form { grid-template-columns: 1fr; } }
