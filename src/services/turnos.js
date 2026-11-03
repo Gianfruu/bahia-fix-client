@@ -13,7 +13,8 @@ async function request(path, options = {}) {
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
   try {
     const response = await fetch(`${API_BASE_URL}${path}`, {
-      ...options, signal: controller.signal,
+      ...options,
+      signal: controller.signal,
       headers: { "Content-Type": "application/json", ...(options.headers || {}) }
     });
     const body = await response.text();
@@ -28,16 +29,33 @@ async function request(path, options = {}) {
       throw error;
     }
     return result.data;
-  } finally { clearTimeout(timeout); }
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 function isConnectionError(error) {
   return error.name === "AbortError" || error instanceof TypeError;
 }
 
-function paginate(records, query, page, limit) {
+function validateLocalConflict(payload, excludeId = null) {
+  if (payload.estado === "Cancelado") return;
+  const conflict = localTurnos.find((item) =>
+    String(item.id) !== String(excludeId) && item.fecha === payload.fecha &&
+    item.hora === payload.hora && item.estado !== "Cancelado"
+  );
+  if (conflict) throw new Error("Ya existe un turno activo en esa fecha y horario.");
+}
+
+function paginate(records, query, page, limit, filters = {}) {
   const normalized = String(query || "").trim().toLocaleLowerCase("es");
-  const filtered = records.filter((item) => Object.values(item).some((value) => String(value).toLocaleLowerCase("es").includes(normalized))).sort((a, b) => b.id - a.id);
+  let filtered = records.filter((item) => {
+    const matchesText = !normalized || Object.values(item).some((value) => String(value).toLocaleLowerCase("es").includes(normalized));
+    const matchesDate = !filters.fecha || item.fecha === filters.fecha;
+    const matchesState = !filters.estado || item.estado === filters.estado;
+    const matchesClient = !filters.clienteId || String(item.clienteId) === String(filters.clienteId);
+    return matchesText && matchesDate && matchesState && matchesClient;
+  }).sort((a, b) => `${a.fecha}T${a.hora}`.localeCompare(`${b.fecha}T${b.hora}`));
   const total = filtered.length;
   const totalPages = Math.max(1, Math.ceil(total / limit));
   const currentPage = Math.min(page, totalPages);
@@ -45,11 +63,32 @@ function paginate(records, query, page, limit) {
   return { items: filtered.slice(start, start + limit), total, page: currentPage, limit, totalPages };
 }
 
-export async function getTurnos({ q = "", page = 1, limit = 10 } = {}) {
-  try { return { ...await request(`/turnos?q=${encodeURIComponent(q)}&page=${page}&limit=${limit}`), source: "api" }; }
-  catch (error) {
+export async function getTurnos({ q = "", page = 1, limit = 10, fecha = "", estado = "", clienteId = "" } = {}) {
+  const params = new URLSearchParams({ q, page: String(page), limit: String(limit) });
+  if (fecha) params.set("fecha", fecha);
+  if (estado) params.set("estado", estado);
+  if (clienteId) params.set("clienteId", clienteId);
+  try {
+    return { ...await request(`/turnos?${params.toString()}`), source: "api" };
+  } catch (error) {
     if (!isConnectionError(error)) throw error;
-    return { ...paginate(localTurnos, q, page, limit), source: "demo" };
+    return { ...paginate(localTurnos, q, page, limit, { fecha, estado, clienteId }), source: "demo" };
+  }
+}
+
+export async function getResumenTurnos() {
+  try {
+    return { ...(await request("/turnos/resumen")), source: "api" };
+  } catch (error) {
+    if (!isConnectionError(error)) throw error;
+    return {
+      total: localTurnos.length,
+      solicitados: localTurnos.filter((item) => item.estado === "Solicitado").length,
+      confirmados: localTurnos.filter((item) => item.estado === "Confirmado").length,
+      atendidos: localTurnos.filter((item) => item.estado === "Atendido").length,
+      cancelados: localTurnos.filter((item) => item.estado === "Cancelado").length,
+      source: "demo"
+    };
   }
 }
 
@@ -65,6 +104,7 @@ export async function createTurno(payload) {
   try { return { record: await request("/turnos", { method: "POST", body: JSON.stringify(payload) }), source: "api" }; }
   catch (error) {
     if (!isConnectionError(error)) throw error;
+    validateLocalConflict(payload);
     const nextId = Math.max(200, ...localTurnos.map((item) => item.id)) + 1;
     const record = { id: nextId, ...payload };
     localTurnos.push(record);
@@ -78,7 +118,19 @@ export async function updateTurno(id, payload) {
     if (!isConnectionError(error)) throw error;
     const record = localTurnos.find((item) => String(item.id) === String(id));
     if (!record) throw new Error("No se encontró el turno que querés modificar.");
+    validateLocalConflict(payload, id);
     Object.assign(record, payload);
+    return { record, source: "demo" };
+  }
+}
+
+export async function updateEstadoTurno(id, estado) {
+  try { return { record: await request(`/turnos/${id}/estado`, { method: "PATCH", body: JSON.stringify({ estado }) }), source: "api" }; }
+  catch (error) {
+    if (!isConnectionError(error)) throw error;
+    const record = localTurnos.find((item) => String(item.id) === String(id));
+    if (!record) throw new Error("No se encontró el turno solicitado.");
+    record.estado = estado;
     return { record, source: "demo" };
   }
 }
