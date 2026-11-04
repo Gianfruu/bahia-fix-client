@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   createReparacion,
   deleteReparacion,
@@ -33,7 +33,8 @@ const emptyForm = {
   repuestos: []
 };
 
-function Reparaciones() {
+function Reparaciones({ role = "Operador" }) {
+  const isTechnician = role === "Técnico";
   const [items, setItems] = useState([]);
   const [clientes, setClientes] = useState([]);
   const [equipos, setEquipos] = useState([]);
@@ -46,7 +47,7 @@ function Reparaciones() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
 
-  async function loadData() {
+  const loadData = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
@@ -63,11 +64,11 @@ function Reparaciones() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [query, estadoFiltro]);
 
   useEffect(() => {
-    loadData();
-  }, [query, estadoFiltro]);
+    Promise.resolve().then(loadData);
+  }, [loadData]);
 
   const equiposDelCliente = useMemo(
     () => equipos.filter((equipo) => String(equipo.clienteId) === String(form.clienteId)),
@@ -215,7 +216,7 @@ function Reparaciones() {
           <h2>Órdenes de reparación</h2>
           <p className="section-description">Registrá ingresos, diagnósticos y presupuestos de cada equipo.</p>
         </div>
-        <button className="rep-primary" onClick={openCreate}>＋ Nueva reparación</button>
+        {!isTechnician && <button className="rep-primary" onClick={openCreate}>＋ Nueva reparación</button>}
       </div>
 
       <div className="rep-stats">
@@ -259,7 +260,7 @@ function Reparaciones() {
                   <td>${Number(item.total || 0).toLocaleString("es-AR")}</td>
                   <td className="rep-actions">
                     <button onClick={() => openEdit(item)}>Editar</button>
-                    <button className="rep-delete" onClick={() => handleDelete(item)}>Eliminar</button>
+                    {!isTechnician && <button className="rep-delete" onClick={() => handleDelete(item)}>Eliminar</button>}
                   </td>
                 </tr>
               ))}
@@ -274,37 +275,37 @@ function Reparaciones() {
             <div className="rep-modal-heading">
               <div>
                 <p className="eyebrow">{editor.mode === "create" ? "NUEVO INGRESO" : `ORDEN #${editor.id}`}</p>
-                <h3>{editor.mode === "create" ? "Registrar reparación" : "Editar reparación"}</h3>
+                <h3>{editor.mode === "create" ? "Registrar reparación" : isTechnician ? "Actualizar trabajo técnico" : "Editar reparación"}</h3>
               </div>
               <button type="button" className="rep-close" onClick={() => setEditor(null)}>×</button>
             </div>
 
             <div className="rep-form-grid">
               <label>Cliente
-                <select name="clienteId" value={form.clienteId} onChange={changeField} required>
+                <select name="clienteId" value={form.clienteId} onChange={changeField} required disabled={isTechnician}>
                   <option value="">Seleccionar cliente</option>
                   {clientes.map((cliente) => <option key={cliente.id} value={cliente.id}>{cliente.nombre} {cliente.apellido}</option>)}
                 </select>
               </label>
               <label>Equipo
-                <select name="equipoId" value={form.equipoId} onChange={changeField} required>
+                <select name="equipoId" value={form.equipoId} onChange={changeField} required disabled={isTechnician}>
                   <option value="">Seleccionar equipo</option>
                   {equiposDelCliente.map((equipo) => <option key={equipo.id} value={equipo.id}>{equipo.tipo} · {equipo.marca} {equipo.modelo}</option>)}
                 </select>
               </label>
               <label>Fecha de ingreso
-                <input type="date" name="fechaIngreso" value={form.fechaIngreso} onChange={changeField} required />
+                <input type="date" name="fechaIngreso" value={form.fechaIngreso} onChange={changeField} required disabled={isTechnician} />
               </label>
               <label>Estado
                 <select name="estado" value={form.estado} onChange={changeField}>
-                  {estados.map((estado) => <option key={estado}>{estado}</option>)}
+                  {estados.filter((estado) => !isTechnician || ["En diagnóstico", "En reparación", "Terminado"].includes(estado) || estado === form.estado).map((estado) => <option key={estado}>{estado}</option>)}
                 </select>
               </label>
               <label className="rep-full">Motivo de ingreso
-                <input name="motivo" value={form.motivo} onChange={changeField} placeholder="Ej. No enciende, pérdida de potencia..." required />
+                <input name="motivo" value={form.motivo} onChange={changeField} placeholder="Ej. No enciende, pérdida de potencia..." required disabled={isTechnician} />
               </label>
               <label className="rep-full">Observaciones de recepción
-                <textarea name="observaciones" value={form.observaciones} onChange={changeField} rows="2" />
+                <textarea name="observaciones" value={form.observaciones} onChange={changeField} rows="2" disabled={isTechnician} />
               </label>
               <label className="rep-full">Diagnóstico técnico
                 <textarea name="diagnostico" value={form.diagnostico} onChange={changeField} rows="3" placeholder="Falla detectada y evaluación técnica..." />
@@ -313,24 +314,24 @@ function Reparaciones() {
                 <textarea name="trabajoRealizado" value={form.trabajoRealizado} onChange={changeField} rows="2" />
               </label>
               <label>Mano de obra ($)
-                <input type="number" min="0" step="0.01" name="manoObra" value={form.manoObra} onChange={changeField} />
+                <input type="number" min="0" step="0.01" name="manoObra" value={form.manoObra} onChange={changeField} disabled={isTechnician} />
               </label>
               <label>Garantía
-                <select name="garantia" value={form.garantia} onChange={changeField}>
+                <select name="garantia" value={form.garantia} onChange={changeField} disabled={isTechnician}>
                   <option>A verificar</option><option>En garantía</option><option>Fuera de garantía</option>
                 </select>
               </label>
             </div>
 
             <div className="rep-parts-heading">
-              <h4>Repuestos del presupuesto</h4>
+              <h4>{isTechnician ? "Repuestos utilizados" : "Repuestos del presupuesto"}</h4>
               <button type="button" onClick={addRepuesto}>＋ Agregar repuesto</button>
             </div>
             {form.repuestos.map((item, index) => (
               <div className="rep-part-row" key={index}>
                 <input aria-label="Descripción del repuesto" placeholder="Descripción" value={item.descripcion} onChange={(event) => updateRepuesto(index, "descripcion", event.target.value)} />
                 <input aria-label="Cantidad" type="number" min="1" value={item.cantidad} onChange={(event) => updateRepuesto(index, "cantidad", event.target.value)} />
-                <input aria-label="Precio unitario" type="number" min="0" step="0.01" value={item.precio} onChange={(event) => updateRepuesto(index, "precio", event.target.value)} />
+                <input aria-label="Precio unitario" type="number" min="0" step="0.01" value={item.precio} onChange={(event) => updateRepuesto(index, "precio", event.target.value)} disabled={isTechnician} />
                 <button type="button" className="rep-delete" onClick={() => removeRepuesto(index)}>Quitar</button>
               </div>
             ))}

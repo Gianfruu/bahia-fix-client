@@ -60,9 +60,10 @@ function getLocalRecords(resource) {
   return resource === "clientes" ? localClientes : localEquipos;
 }
 
-async function list(resource, query, page, limit) {
+async function list(resource, query, page, limit, sortBy, order) {
   try {
-    const data = await request(`/${resource}?q=${encodeURIComponent(query)}&page=${page}&limit=${limit}`);
+    const params = new URLSearchParams({ q: query, page: String(page), limit: String(limit), sortBy, order });
+    const data = await request(`/${resource}?${params.toString()}`);
     return { ...data, source: "api" };
   } catch (error) {
     if (!isConnectionError(error)) throw error;
@@ -128,8 +129,8 @@ async function remove(resource, id) {
   }
 }
 
-export const getClientes = ({ q = "", page = 1, limit = 10 } = {}) => list("clientes", q, page, limit);
-export const getEquipos = ({ q = "", page = 1, limit = 10 } = {}) => list("equipos", q, page, limit);
+export const getClientes = ({ q = "", page = 1, limit = 10, sortBy = "id", order = "asc" } = {}) => list("clientes", q, page, limit, sortBy, order);
+export const getEquipos = ({ q = "", page = 1, limit = 10, sortBy = "id", order = "asc" } = {}) => list("equipos", q, page, limit, sortBy, order);
 export const getClienteById = (id) => getOne("clientes", id);
 export const getEquipoById = (id) => getOne("equipos", id);
 export const createCliente = (payload) => create("clientes", payload);

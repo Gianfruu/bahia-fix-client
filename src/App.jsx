@@ -1,8 +1,12 @@
+
+import { useState } from "react";
 import SiteHeader from "./components/SiteHeader.jsx";
 import SiteFooter from "./components/SiteFooter.jsx";
+import MainNavigation from "./components/MainNavigation.jsx";
 import ClientesEquipos from "./pages/ClientesEquipos.jsx";
 import Turnos from "./pages/Turnos.jsx";
 import Reparaciones from "./pages/Reparaciones.jsx";
+import AccessDashboard from "./pages/AccessDashboard.jsx";
 
 const modules = [
   {
@@ -11,9 +15,8 @@ const modules = [
     title: "Clientes y equipos",
     description:
       "Consultá la información de clientes y los equipos ingresados al taller.",
-    status: "Disponible",
     href: "#clientes-equipos",
-    available: true,
+    permission: "clientes",
   },
   {
     id: "turnos-card",
@@ -21,9 +24,8 @@ const modules = [
     title: "Turnos",
     description:
       "Organizá las solicitudes de atención y la recepción de equipos.",
-    status: "Disponible",
     href: "#turnos",
-    available: true,
+    permission: "turnos",
   },
   {
     id: "reparaciones-card",
@@ -31,16 +33,45 @@ const modules = [
     title: "Reparaciones",
     description:
       "Centralizá diagnósticos, presupuestos y seguimiento de los trabajos.",
-    status: "Disponible",
     href: "#reparaciones",
-    available: true,
+    permission: "reparaciones",
   },
 ];
 
 function App() {
+  const [user, setUser] = useState(() => {
+    try {
+      return JSON.parse(sessionStorage.getItem("bahiaFixUser")) || null;
+    } catch {
+      return null;
+    }
+  });
+
+  function handleLogin(nextUser) {
+    sessionStorage.setItem("bahiaFixUser", JSON.stringify(nextUser));
+    setUser(nextUser);
+  }
+
+  function handleLogout() {
+    sessionStorage.removeItem("bahiaFixUser");
+    setUser(null);
+  }
+
+  if (!user) {
+    return (
+      <div className="app-shell access-only">
+        <AccessDashboard onLogin={handleLogin} />
+      </div>
+    );
+  }
+
+  const permissions = user.permissions || [];
+  const canSee = (permission) => permissions.includes(permission);
+
   return (
     <div className="app-shell" id="inicio">
       <SiteHeader />
+      <MainNavigation user={user} onLogout={handleLogout} />
 
       <main className="main-content">
         <section className="hero-section">
@@ -79,6 +110,8 @@ function App() {
           </div>
         </section>
 
+        <AccessDashboard user={user} onLogout={handleLogout} />
+
         <section
           className="modules-section"
           id="modulos"
@@ -91,50 +124,45 @@ function App() {
             </div>
 
             <p className="section-description">
-              Una estructura clara para acompañar cada etapa del servicio.
+              Accesos disponibles para el perfil {user.role}.
             </p>
           </div>
-           <div className="module-grid">
-            {modules.map((module) => (
-              <article
-                className={`module-card ${
-                  module.available ? "module-card-available" : ""
-                }`}
-                id={module.id}
-                key={module.id}
-              >
-                <div className="module-card-top">
-                  <span className="module-number">{module.number}</span>
-                  <span className="module-arrow" aria-hidden="true">
-                    ↗
-                  </span>
-                </div>
 
-                <h3>{module.title}</h3>
-                <p>{module.description}</p>
+          <div className="module-grid">
+            {modules
+              .filter((module) => canSee(module.permission))
+              .map((module) => (
+                <article
+                  className="module-card module-card-available"
+                  id={module.id}
+                  key={module.id}
+                >
+                  <div className="module-card-top">
+                    <span className="module-number">{module.number}</span>
+                    <span className="module-arrow" aria-hidden="true">
+                      ↗
+                    </span>
+                  </div>
 
-                <div className="module-card-bottom">
-                  <span
-                    className={`module-status-dot ${
-                      module.available ? "module-status-active" : ""
-                    }`}
-                  />
-                  <span>{module.status}</span>
-                </div>
+                  <h3>{module.title}</h3>
+                  <p>{module.description}</p>
 
-                {module.available && (
+                  <div className="module-card-bottom">
+                    <span className="module-status-dot module-status-active" />
+                    <span>Disponible</span>
+                  </div>
+
                   <a className="module-card-action" href={module.href}>
                     Abrir módulo <span aria-hidden="true">→</span>
                   </a>
-                )}
-              </article>
-            ))}
+                </article>
+              ))}
           </div>
         </section>
 
-        <ClientesEquipos />
-        <Turnos />
-        <Reparaciones />
+        {canSee("clientes") && <ClientesEquipos />}
+        {canSee("turnos") && <Turnos />}
+        {canSee("reparaciones") && <Reparaciones role={user.role} />}
       </main>
 
       <SiteFooter />

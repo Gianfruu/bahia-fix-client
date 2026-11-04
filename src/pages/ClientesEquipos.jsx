@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { demoClientes } from "../data/demo-data.js";
 import {
   createCliente, createEquipo, deleteCliente, deleteEquipo,
@@ -28,7 +28,7 @@ function ClientesEquipos() {
   const isClientes = activeTab === "clientes";
   const resourceLabel = isClientes ? "cliente" : "equipo";
 
-  async function loadRecords() {
+  const loadRecords = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
@@ -41,9 +41,11 @@ function ClientesEquipos() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [isClientes, query, page]);
 
-  useEffect(() => { loadRecords(); }, [activeTab, query, page]);
+  useEffect(() => {
+    Promise.resolve().then(loadRecords);
+  }, [loadRecords]);
 
   useEffect(() => {
     getClientes({ page: 1, limit: 100 })
