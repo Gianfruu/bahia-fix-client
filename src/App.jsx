@@ -1,8 +1,8 @@
-
 import SiteHeader from "./components/SiteHeader.jsx";
 import SiteFooter from "./components/SiteFooter.jsx";
 import ClientesEquipos from "./pages/ClientesEquipos.jsx";
 import Turnos from "./pages/Turnos.jsx";
+import Reparaciones from "./pages/Reparaciones.jsx";
 
 const modules = [
   {
@@ -16,7 +16,7 @@ const modules = [
     available: true,
   },
   {
-    id: "turnos",
+    id: "turnos-card",
     number: "02",
     title: "Turnos",
     description:
@@ -26,14 +26,14 @@ const modules = [
     available: true,
   },
   {
-    id: "reparaciones",
+    id: "reparaciones-card",
     number: "03",
     title: "Reparaciones",
     description:
       "Centralizá diagnósticos, presupuestos y seguimiento de los trabajos.",
-    status: "En preparación",
+    status: "Disponible",
     href: "#reparaciones",
-    available: false,
+    available: true,
   },
 ];
 
@@ -94,8 +94,7 @@ function App() {
               Una estructura clara para acompañar cada etapa del servicio.
             </p>
           </div>
-
-          <div className="module-grid">
+           <div className="module-grid">
             {modules.map((module) => (
               <article
                 className={`module-card ${
@@ -135,6 +134,7 @@ function App() {
 
         <ClientesEquipos />
         <Turnos />
+        <Reparaciones />
       </main>
 
       <SiteFooter />
