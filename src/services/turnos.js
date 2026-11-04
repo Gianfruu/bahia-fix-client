@@ -47,7 +47,7 @@ function validateLocalConflict(payload, excludeId = null) {
   if (conflict) throw new Error("Ya existe un turno activo en esa fecha y horario.");
 }
 
-function paginate(records, query, page, limit, filters = {}) {
+function paginate(records, query, page, limit, filters = {}, sortBy = "fecha", order = "asc") {
   const normalized = String(query || "").trim().toLocaleLowerCase("es");
   let filtered = records.filter((item) => {
     const matchesText = !normalized || Object.values(item).some((value) => String(value).toLocaleLowerCase("es").includes(normalized));
@@ -55,7 +55,14 @@ function paginate(records, query, page, limit, filters = {}) {
     const matchesState = !filters.estado || item.estado === filters.estado;
     const matchesClient = !filters.clienteId || String(item.clienteId) === String(filters.clienteId);
     return matchesText && matchesDate && matchesState && matchesClient;
-  }).sort((a, b) => `${a.fecha}T${a.hora}`.localeCompare(`${b.fecha}T${b.hora}`));
+  }).sort((a, b) => {
+    const first = a[sortBy] ?? "";
+    const second = b[sortBy] ?? "";
+    const comparison = typeof first === "number" && typeof second === "number"
+      ? first - second
+      : String(first).localeCompare(String(second), "es", { numeric: true, sensitivity: "base" });
+    return order === "desc" ? -comparison : comparison;
+  });
   const total = filtered.length;
   const totalPages = Math.max(1, Math.ceil(total / limit));
   const currentPage = Math.min(page, totalPages);
@@ -63,8 +70,8 @@ function paginate(records, query, page, limit, filters = {}) {
   return { items: filtered.slice(start, start + limit), total, page: currentPage, limit, totalPages };
 }
 
-export async function getTurnos({ q = "", page = 1, limit = 10, fecha = "", estado = "", clienteId = "" } = {}) {
-  const params = new URLSearchParams({ q, page: String(page), limit: String(limit) });
+export async function getTurnos({ q = "", page = 1, limit = 10, fecha = "", estado = "", clienteId = "", sortBy = "fecha", order = "asc" } = {}) {
+  const params = new URLSearchParams({ q, page: String(page), limit: String(limit), sortBy, order });
   if (fecha) params.set("fecha", fecha);
   if (estado) params.set("estado", estado);
   if (clienteId) params.set("clienteId", clienteId);
@@ -72,7 +79,7 @@ export async function getTurnos({ q = "", page = 1, limit = 10, fecha = "", esta
     return { ...await request(`/turnos?${params.toString()}`), source: "api" };
   } catch (error) {
     if (!isConnectionError(error)) throw error;
-    return { ...paginate(localTurnos, q, page, limit, { fecha, estado, clienteId }), source: "demo" };
+    return { ...paginate(localTurnos, q, page, limit, { fecha, estado, clienteId }, sortBy, order), source: "demo" };
   }
 }
 
