@@ -8,6 +8,7 @@ import {
   updateReparacion
 } from "../services/reparaciones.js";
 import "../styles/reparaciones.css";
+import { downloadPdfReport } from "../utils/pdf-report.js";
 
 const estados = [
   "Recibido",
@@ -69,6 +70,45 @@ function Reparaciones({ role = "Operador" }) {
   useEffect(() => {
     Promise.resolve().then(loadData);
   }, [loadData]);
+
+  async function exportReport() {
+    setError("");
+    setNotice("");
+
+    try {
+      const firstPage = await getReparaciones({ page: 1, limit: 100, q: query, estado: estadoFiltro });
+      let records = [...(firstPage.items || [])];
+
+      for (let currentPage = 2; currentPage <= firstPage.totalPages; currentPage += 1) {
+        const response = await getReparaciones({ page: currentPage, limit: 100, q: query, estado: estadoFiltro });
+        records = records.concat(response.items || []);
+      }
+
+      const rows = records.map((item) => [
+        item.id,
+        clienteNombre(item.clienteId),
+        equipoNombre(item.equipoId),
+        item.fechaIngreso,
+        item.motivo,
+        item.diagnostico,
+        item.trabajoRealizado,
+        item.estado,
+        item.garantia,
+        `$${Number(item.total || 0).toLocaleString("es-AR")}`
+      ]);
+
+      downloadPdfReport(
+        "Reporte de reparaciones - Bahía Fix",
+        ["Orden", "Cliente", "Equipo", "Ingreso", "Motivo", "Diagnóstico", "Trabajo realizado", "Estado", "Garantía", "Total"],
+        rows,
+        "reporte_reparaciones.pdf",
+        `Generado: ${new Date().toLocaleString("es-AR")} | Registros: ${records.length}${query ? ` | Búsqueda: ${query}` : ""}${estadoFiltro ? ` | Estado: ${estadoFiltro}` : ""}`
+      );
+      setNotice(`Se descargó el reporte con ${records.length} reparaciones.`);
+    } catch (err) {
+      setError(err.message || "No se pudo generar el reporte de reparaciones.");
+    }
+  }
 
   const equiposDelCliente = useMemo(
     () => equipos.filter((equipo) => String(equipo.clienteId) === String(form.clienteId)),
@@ -232,6 +272,9 @@ function Reparaciones({ role = "Operador" }) {
           <option value="">Todos los estados</option>
           {estados.map((estado) => <option key={estado} value={estado}>{estado}</option>)}
         </select>
+        <button type="button" className="rep-primary rep-export" onClick={exportReport} disabled={loading}>
+          Exportar PDF
+        </button>
       </div>
 
       {error && <div className="rep-alert rep-error">{error}</div>}

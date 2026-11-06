@@ -41,3 +41,5 @@
 .rep-total strong{font-size:1.3rem;margin-left:8px}
 .rep-modal-actions{display:flex;justify-content:flex-end;gap:10px;border-top:1px solid #edf0f4;padding-top:17px}
 @media(max-width:700px){.rep-heading{align-items:flex-start;flex-direction:column}.rep-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.rep-toolbar{flex-direction:column}.rep-toolbar select{max-width:none}.rep-form-grid{grid-template-columns:1fr}.rep-full{grid-column:auto}.rep-part-row{grid-template-columns:1fr 1fr}.rep-part-row input:first-child{grid-column:1/-1}.rep-modal{padding:18px}}
+.rep-export { white-space: nowrap; cursor: pointer; }
+.rep-export:disabled { opacity: .6; cursor: not-allowed; }
