@@ -30,3 +30,5 @@
 .turnos-empty span { font-size: .9rem; }
 @media (max-width: 900px) { .turnos-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); } .turnos-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 720px) { .turnos-heading { align-items: flex-start; flex-direction: column; } .turnos-toolbar { align-items: stretch; flex-direction: column; } .turnos-search { width: auto; } .turnos-panel { padding: 14px; } .turnos-form { grid-template-columns: 1fr; } .turnos-filters { grid-template-columns: 1fr; } .turnos-stats { gap: 9px; } .turnos-stat { padding: 14px; } .agenda-caption { align-items: flex-start; flex-direction: column; } }
+.turnos-toolbar-actions { display: flex; align-items: center; gap: 10px; }
+@media (max-width: 720px) { .turnos-toolbar-actions { width: 100%; flex-direction: column; } .turnos-toolbar-actions button { width: 100%; } }
