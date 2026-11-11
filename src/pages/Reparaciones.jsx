@@ -10,6 +10,8 @@ import {
 import "../styles/reparaciones.css";
 import { downloadPdfReport } from "../utils/pdf-report.js";
 
+const PAGE_SIZE = 10;
+
 const estados = [
   "Recibido",
   "En diagnóstico",
@@ -37,6 +39,9 @@ const emptyForm = {
 function Reparaciones({ role = "Operador" }) {
   const isTechnician = role === "Técnico";
   const [items, setItems] = useState([]);
+  const [resumenItems, setResumenItems] = useState([]);
+  const [result, setResult] = useState({ total: 0, totalPages: 1, page: 1 });
+  const [page, setPage] = useState(1);
   const [clientes, setClientes] = useState([]);
   const [equipos, setEquipos] = useState([]);
   const [query, setQuery] = useState("");
@@ -52,12 +57,15 @@ function Reparaciones({ role = "Operador" }) {
     setLoading(true);
     setError("");
     try {
-      const [reparacionesData, clientesData, equiposData] = await Promise.all([
+      const [reparacionesData, resumenData, clientesData, equiposData] = await Promise.all([
+        getReparaciones({ page, limit: PAGE_SIZE, q: query, estado: estadoFiltro }),
         getReparaciones({ page: 1, limit: 100, q: query, estado: estadoFiltro }),
         getClientesParaReparaciones(),
         getEquiposParaReparaciones()
       ]);
       setItems(reparacionesData.items || []);
+      setResult(reparacionesData);
+      setResumenItems(resumenData.items || []);
       setClientes(clientesData);
       setEquipos(equiposData);
     } catch (err) {
@@ -65,11 +73,12 @@ function Reparaciones({ role = "Operador" }) {
     } finally {
       setLoading(false);
     }
-  }, [query, estadoFiltro]);
+  }, [query, estadoFiltro, page]);
 
   useEffect(() => {
     Promise.resolve().then(loadData);
   }, [loadData]);
+
 
   async function exportReport() {
     setError("");
@@ -126,10 +135,26 @@ function Reparaciones({ role = "Operador" }) {
     return equipo ? `${equipo.tipo} ${equipo.marca} ${equipo.modelo}` : "Equipo no disponible";
   };
 
-  function openCreate() {
+  async function openCreate() {
     setError("");
-    setForm({ ...emptyForm, clienteId: String(clientes[0]?.id || "") });
-    setEditor({ mode: "create" });
+    setNotice("");
+
+    try {
+      const [clientesActualizados, equiposActualizados] = await Promise.all([
+        getClientesParaReparaciones(),
+        getEquiposParaReparaciones()
+      ]);
+
+      setClientes(clientesActualizados);
+      setEquipos(equiposActualizados);
+      setForm({
+        ...emptyForm,
+        clienteId: String(clientesActualizados[0]?.id || "")
+      });
+      setEditor({ mode: "create" });
+    } catch (err) {
+      setError(err.message || "No se pudieron actualizar los clientes y equipos.");
+    }
   }
 
   function openEdit(item) {
@@ -243,10 +268,10 @@ function Reparaciones({ role = "Operador" }) {
   }
 
   const counts = {
-    abiertas: items.filter((item) => !["Terminado", "Entregado"].includes(item.estado)).length,
-    diagnostico: items.filter((item) => item.estado === "En diagnóstico").length,
-    reparacion: items.filter((item) => item.estado === "En reparación").length,
-    terminadas: items.filter((item) => ["Terminado", "Entregado"].includes(item.estado)).length
+    abiertas: resumenItems.filter((item) => !["Terminado", "Entregado"].includes(item.estado)).length,
+    diagnostico: resumenItems.filter((item) => item.estado === "En diagnóstico").length,
+    reparacion: resumenItems.filter((item) => item.estado === "En reparación").length,
+    terminadas: resumenItems.filter((item) => ["Terminado", "Entregado"].includes(item.estado)).length
   };
 
   return (
@@ -268,8 +293,8 @@ function Reparaciones({ role = "Operador" }) {
       </div>
 
       <div className="rep-toolbar">
-        <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar por cliente, equipo o motivo..." />
-        <select value={estadoFiltro} onChange={(event) => setEstadoFiltro(event.target.value)}>
+        <input value={query} onChange={(event) => { setQuery(event.target.value); setPage(1); }} placeholder="Buscar por cliente, equipo o motivo..." />
+        <select value={estadoFiltro} onChange={(event) => { setEstadoFiltro(event.target.value); setPage(1); }}>
           <option value="">Todos los estados</option>
           {estados.map((estado) => <option key={estado} value={estado}>{estado}</option>)}
         </select>
@@ -312,6 +337,14 @@ function Reparaciones({ role = "Operador" }) {
           </table>
         </div>
       )}
+
+      <div className="records-pagination rep-pagination">
+        <span>{result.total || 0} órdenes · Página {page} de {result.totalPages || 1}</span>
+        <div className="pagination-actions">
+          <button type="button" className="pagination-button" disabled={page <= 1 || loading} onClick={() => setPage((current) => current - 1)}>Anterior</button>
+          <button type="button" className="pagination-button" disabled={page >= (result.totalPages || 1) || loading} onClick={() => setPage((current) => current + 1)}>Siguiente</button>
+        </div>
+      </div>
 
       {editor && (
         <div className="rep-modal-backdrop">

@@ -43,3 +43,10 @@
 @media(max-width:700px){.rep-heading{align-items:flex-start;flex-direction:column}.rep-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.rep-toolbar{flex-direction:column}.rep-toolbar select{max-width:none}.rep-form-grid{grid-template-columns:1fr}.rep-full{grid-column:auto}.rep-part-row{grid-template-columns:1fr 1fr}.rep-part-row input:first-child{grid-column:1/-1}.rep-modal{padding:18px}}
 .rep-export { white-space: nowrap; cursor: pointer; }
 .rep-export:disabled { opacity: .6; cursor: not-allowed; }
+
+.rep-pagination {
+  margin-top: 14px;
+  background: #fff;
+  border: 1px solid #e5e9ef;
+  border-radius: 10px;
+}

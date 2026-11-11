@@ -1,159 +1,158 @@
-# Bahía Fix - Plataforma de Gestión de Turnos y Reparaciones (Frontend)
+# Bahía Fix — Aplicación web
 
-## Grupo Nro 5
-* **Campagnucci Gianfranco** (Responsable del grupo / Desarrollador) - campagnuccig@gmail.com
-* **Painenahuel Luna Ignacio** (Desarrollador) - Campionrexprohard@gmail.com
-* **Cutropia Ramiro** (Desarrollador) - ramirocarlosc2323@gmail.com
+Aplicación web para la gestión de clientes, equipos, turnos y reparaciones de un taller. Desarrollada con React y Vite.
 
----
+## Descripción
 
-## Presentación del Cliente Web
+El frontend permite consultar y administrar la información del taller desde distintos módulos. La interfaz incluye un panel general y adapta los módulos disponibles según el perfil activo.
 
-El repositorio **bahia-fix-client** contiene la interfaz de usuario web desarrollada para el sistema **Bahía Fix**. Esta aplicación permite interactuar con los cuatro perfiles del sistema (Cliente, Recepción, Mecánico y Administración), brindando una experiencia dinámica para la solicitud de turnos, seguimiento de reparaciones, gestión de presupuestos y administración del taller de herramientas eléctricas y equipos a explosión.
+La aplicación consume la API REST de `bahia-fix-api`. Para el funcionamiento integrado, el backend debe estar iniciado y configurado.
 
----
+## Funcionalidades
 
-## Perfiles de Usuario y Pantallas Principales
+### Acceso y perfiles
 
-La interfaz se adapta según el rol autenticado:
+- Inicio de sesión con cuentas de demostración.
+- Registro simulado de usuarios, con asignación del perfil Operador.
+- Recuperación de contraseña simulada; no se envían correos electrónicos.
+- Visualización del perfil activo y cierre de sesión.
+- Presentación de módulos según el perfil.
 
-### 1. Cliente
-* **Portal de Turnos:** Selección de equipo, fecha, hora y opción de envío.
-* **Declaración de Garantía:** Formulario para adjuntar comprobantes de compra y datos del equipo.
-* **Seguimiento en Tiempo Real:** Consulta interactiva del estado de órdenes de trabajo.
-* **Aprobación de Presupuestos:** Panel interactivo para aprobar o rechazar presupuestos emitidos por los técnicos.
-* **Historial:** Registro histórico de máquinas y servicios realizados.
+| Perfil | Módulos disponibles |
+|---|---|
+| Administrador | Clientes y Equipos, Turnos y Reparaciones |
+| Operador | Clientes y Equipos, Turnos y Reparaciones |
+| Técnico | Reparaciones |
 
-### 2. Recepción / Mostrador
-* **Mesa de Entradas:** Registro rápido de equipos presenciales y envío de cercanía.
-* **Validación de Garantías:** Verificación inicial de números de serie y documentación.
-* **Gestión de Fletes:** Registro y asignación de costos de envío para zonas cercanas.
-* **Emisión de Comprobantes:** Generación de recibos digitales y órdenes de ingreso.
+### Módulos
 
-### 3. Mecánico / Técnico
-* **Cola de Trabajo:** Tablero visual con equipos asignados según prioridad y complejidad.
-* **Ficha Técnica de Diagnóstico:** Formulario para registrar fallas, horas de mano de obra y solicitar repuestos.
-* **Gestión de Presupuestos:** Emisión preliminar de cotizaciones de reparación.
+- **Clientes y Equipos:** consulta, alta, edición y eliminación de registros; búsqueda, filtros y paginación.
+- **Turnos:** consulta, alta, edición, eliminación, actualización de estado, filtros y paginación.
+- **Reparaciones:** consulta, alta, edición y eliminación; búsqueda, filtros, ordenamiento y paginación.
+- **Panel general:** resumen de cantidades de clientes, equipos, turnos y reparaciones.
 
-### 4. Administración / Dueño
-* **Dashboard / Panel de Control:** Indicadores KPI, tiempos medios de reparación y reportes de rendimiento.
-* **Administración de contratos:** Administración de liquidaciones con marcas por garantías.
-* **Administración de Usuarios:** Gestión de roles y permisos del personal.
+### Reportes
 
----
+Los módulos permiten generar reportes en formato PDF con los registros correspondientes.
 
-## Tecnologías Utilizadas
+## Tecnologías
 
-* **Librería Core:** React.js
-* **Enrutamiento:** React Router DOM (Manejo de rutas públicas y protegidas por rol)
-* **Gestión de Estado y Peticiones:** Context API
-* **Estilos:** CSS3
-* **Despliegue:** Despliegue en plataformas cloud como Vercel / Netlify / Render
+- React
+- Vite
+- JavaScript
+- CSS
+- Fetch API
 
----
+## Requisitos
 
-## Estructura del Proyecto Frontend
+- Node.js
+- npm
+- API `bahia-fix-api` en ejecución para utilizar el sistema integrado.
 
-```text
-bahia-fix-client/
-│
-├── public/                  # Archivos estáticos e index.html
-├── src/
-│   ├── assets/              # Imágenes, íconos y estilos globales
-│   ├── components/          # Componentes reutilizables (Botones, Modales, Tablas, Navbars)
-│   ├── context/             # Contextos globales (AuthContext, Cart/ServiceContext)
-│   ├── hooks/               # Custom Hooks (useAuth, useFetch, etc.)
-│   ├── pages/               # Vistas principales organizadas por rol
-│   │   ├── auth/            # Login, Registro, Recuperar Contraseña
-│   │   ├── client/          # Mis Turnos, Mis Equipos, Aprobación Presupuesto
-│   │   ├── reception/       # Ingreso Equipos, Validación Fletes
-│   │   ├── tech/            # Cola de Taller, Diagnóstico
-│   │   └── admin/           # Dashboard, Gestión Usuarios, Reportes
-│   ├── routes/              # Configuración de React Router y medidas de Seguridad
-│   ├── services/            # Clientes HTTP para comunicación con bahia-fix-api
-│   └── utils/               # Funciones auxiliares
-├── .env.example             # Plantilla de variables de entorno
-├── package.json
-└── README.md
-```
+## Instalación
 
----
-
-## Instalación y Configuración Local
-
-### Requisitos Previos
-* Node.js (v18 o superior)
-* npm o yarn
-* Servidor Backend (`bahia-fix-api`) en ejecución
-
-### 1. Clonar el Repositorio
+Clonar el repositorio y acceder a su carpeta:
 
 ```bash
 git clone https://github.com/Gianfruu/bahia-fix-client.git
 cd bahia-fix-client
 ```
 
-### 2. Instalar Dependencias
+Instalar las dependencias:
 
 ```bash
 npm install
 ```
 
-### 3. Configurar Variables de Entorno
+## Configuración
 
-Crea un archivo `.env` en la raíz del proyecto basándote en `.env.example`:
+Crear un archivo `.env` en la raíz del proyecto tomando como referencia `.env.example`:
 
 ```env
-REACT_APP_API_URL=http://localhost:3001/api
+VITE_API_URL=http://localhost:3000/api/v1
 ```
 
-### 4. Ejecutar la Aplicación
+`VITE_API_URL` define la dirección base de la API REST.
+
+## Ejecución
+
+Iniciar el servidor de desarrollo:
 
 ```bash
-npm start
+npm run dev
 ```
 
-La aplicación se abrirá automáticamente en `http://localhost:3000`.
+Vite mostrará en la terminal la dirección local de la aplicación. Por defecto:
 
----
+```text
+http://localhost:5173
+```
 
-## Integración con la API Backend
+Para generar la versión de producción:
 
-El frontend se comunica con la API REST (`bahia-fix-api`) mediante solicitudes HTTP autenticadas:
+```bash
+npm run build
+```
 
-* **Autenticación:** Las solicitudes protegidas adjuntan el token JWT en el header:
-  `Authorization: Bearer <TOKEN>`
+Para ejecutar la compilación localmente:
 
----
+```bash
+npm run preview
+```
 
-## Funcionalidades frontend esperadas
+Para analizar el código con ESLint:
 
-### Autenticación y Perfil
-- Formulario de Inicio de Sesión y Registro.
-- Persistencia de sesión con LocalStorage/Cookies y JWT.
-- Rutas protegidas según el perfil de usuario.
+```bash
+npm run lint
+```
 
-### Módulo de Clientes
-- Calendario e interfaz para selección de turnos.
-- Formulario de carga de comprobante de garantía (soporte para subida de imágenes/PDF).
-- Vista interactiva de estado de la reparación.
-- Modal de aprobación / rechazo de presupuesto.
+## Cuentas de demostración
 
-### Módulo de Recepción y Taller
-- Registro de ingreso rápido de maquinaria con código de seguimiento.
-- Vista de cola de reparaciones para mecánicos.
-- Formulario de diagnóstico y cálculo de costo de repuestos mas la mano de obra.
-- Alta de orden de entrada para recepción.
-- Asignación de logística y fletes para zonas cercanas.
+| Perfil | Correo | Contraseña |
+|---|---|---|
+| Administrador | `admin@bahiafix.com` | `Admin123` |
+| Operador | `operador@bahiafix.com` | `Operador123` |
+| Técnico | `tecnico@bahiafix.com` | `Tecnico123` |
 
-### Módulo de Mecánicos y Taller
-- Tablero de tareas para mecánicos.
-- Creación de presupuestos y diagnósticos.
-- Carga de repuestos y horas trabajadas.
-- Notificación automática de cambio de estado de orden.
+Las cuentas permiten recorrer los distintos perfiles de la interfaz. El inicio de sesión, el registro y la recuperación de contraseña son flujos simulados; no utilizan un servicio externo de autenticación.
 
-### Módulo Administrativo
-- Gráficos interactivos de analítica (tiempos promedio, fallas más comunes).
-- Panel general de facturación y liquidaciones de garantía.
-- Gestión de catálogo de repuestos y stock.
-- Tabla de gestión de usuarios y roles.
+## Integración con la API
+
+La aplicación utiliza la URL definida en `VITE_API_URL`. Si la variable no está configurada, la dirección predeterminada es:
+
+```text
+http://localhost:3000/api/v1
+```
+
+El backend debe permitir el origen del frontend mediante la variable `CLIENT_URL`.
+
+Algunos servicios disponen de datos locales de demostración como alternativa cuando la API no está disponible. Estos datos se mantienen en memoria y no constituyen almacenamiento persistente.
+
+## Estructura del proyecto
+
+```text
+bahia-fix-client/
+├── public/
+├── src/
+│   ├── components/
+│   ├── data/
+│   ├── pages/
+│   ├── services/
+│   ├── styles/
+│   ├── utils/
+│   ├── App.jsx
+│   └── main.jsx
+├── state/
+├── .env.example
+├── index.html
+├── package.json
+└── README.md
+```
+
+## Consideraciones
+
+- La aplicación forma parte de un prototipo funcional.
+- La persistencia de los datos depende del backend, que utiliza estructuras en memoria.
+- Los cambios realizados en el backend se pierden al reiniciar el servidor.
+- El registro, la recuperación de contraseña y la autenticación son simulados.
+- Los perfiles permiten probar la disponibilidad de los módulos desde la interfaz.
