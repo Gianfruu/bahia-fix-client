@@ -1,26 +1,26 @@
 # Bahía Fix — Aplicación web
 
-Aplicación web de gestión de clientes, equipos, turnos y reparaciones, desarrollada con React y Vite.
+Aplicación web para la gestión de clientes, equipos, turnos y reparaciones de un taller. Está desarrollada con React y Vite.
 
 ## Descripción
 
-El frontend de Bahía Fix permite acceder a un espacio de trabajo con módulos para consultar y administrar clientes, equipos, turnos y reparaciones. La interfaz presenta información general del taller y adapta los módulos disponibles según el perfil seleccionado al iniciar sesión.
+El frontend permite consultar y administrar la información del taller desde distintos módulos. La interfaz incluye un panel general y adapta los módulos disponibles según el perfil activo.
 
-La aplicación se comunica con la API REST `bahia-fix-api`. Si no puede establecer conexión con la API, algunos servicios utilizan datos de demostración locales para permitir la navegación y las operaciones del prototipo.
+La aplicación consume la API REST de `bahia-fix-api`. Para el funcionamiento integrado, el backend debe estar iniciado y configurado. Algunos servicios disponen de datos locales de demostración como alternativa cuando la API no está disponible; esos datos se mantienen en memoria y no constituyen almacenamiento persistente.
 
 ## Funcionalidades
 
 ### Acceso y perfiles
 
 - Inicio de sesión con cuentas de demostración.
-- Registro simulado de usuarios, asignando el perfil Operador.
+- Registro simulado de usuarios, con asignación del perfil Operador.
 - Recuperación de contraseña simulada; no se envían correos electrónicos.
 - Visualización del perfil activo y cierre de sesión.
-- Acceso a módulos según los permisos del perfil.
+- Presentación de módulos según el perfil y sus permisos.
 
 ### Perfiles disponibles
 
-| Perfil | Acceso |
+| Perfil | Módulos disponibles |
 |---|---|
 | Administrador | Clientes y Equipos, Turnos y Reparaciones |
 | Operador | Clientes y Equipos, Turnos y Reparaciones |
@@ -28,14 +28,14 @@ La aplicación se comunica con la API REST `bahia-fix-api`. Si no puede establec
 
 ### Módulos
 
-- **Clientes y Equipos:** consulta y administración de registros, con búsqueda, paginación y operaciones CRUD.
-- **Turnos:** consulta, creación, modificación, eliminación, actualización de estado, filtros y resumen.
-- **Reparaciones:** consulta y administración de reparaciones, con búsqueda, filtros, ordenamiento y operaciones CRUD.
+- **Clientes y Equipos:** consulta, alta, edición y eliminación de registros; búsqueda, filtros y paginación.
+- **Turnos:** consulta, alta, edición, eliminación, actualización de estado, filtros y paginación.
+- **Reparaciones:** consulta, alta, edición y eliminación; búsqueda, filtros, ordenamiento y paginación.
 - **Panel general:** resumen de cantidades de clientes, equipos, turnos y reparaciones.
 
 ### Reportes
 
-El módulo correspondiente incluye la generación de reportes en PDF para la información presentada.
+Los módulos permiten generar reportes en formato PDF con los registros correspondientes.
 
 ## Tecnologías
 
@@ -47,9 +47,9 @@ El módulo correspondiente incluye la generación de reportes en PDF para la inf
 
 ## Requisitos
 
-- Node.js.
-- npm.
-- API `bahia-fix-api` en ejecución para utilizar los datos y operaciones del backend.
+- Node.js
+- npm
+- API `bahia-fix-api` en ejecución para utilizar el sistema integrado.
 
 ## Instalación
 
@@ -74,7 +74,7 @@ Crear un archivo `.env` en la raíz del proyecto tomando como referencia `.env.e
 VITE_API_URL=http://localhost:3000/api/v1
 ```
 
-`VITE_API_URL` indica la dirección base de la API REST.
+`VITE_API_URL` define la dirección base de la API REST.
 
 ## Ejecución
 
@@ -84,25 +84,25 @@ Iniciar el servidor de desarrollo:
 npm run dev
 ```
 
-Vite mostrará en la terminal la dirección local para abrir la aplicación. Por defecto, suele ser:
+Vite mostrará en la terminal la dirección local de la aplicación. Por defecto:
 
 ```text
 http://localhost:5173
 ```
 
-Para generar una versión de producción:
+Para generar la versión de producción:
 
 ```bash
 npm run build
 ```
 
-Para visualizar localmente la compilación:
+Para ejecutar la compilación localmente:
 
 ```bash
 npm run preview
 ```
 
-Para ejecutar el análisis estático del código:
+Para analizar el código con ESLint:
 
 ```bash
 npm run lint
@@ -116,11 +116,11 @@ npm run lint
 | Operador | `operador@bahiafix.com` | `Operador123` |
 | Técnico | `tecnico@bahiafix.com` | `Tecnico123` |
 
-Estas cuentas están definidas en la aplicación para probar los distintos perfiles. El inicio de sesión no consulta un servicio de autenticación externo.
+Estas cuentas permiten recorrer los distintos perfiles de la interfaz. El inicio de sesión, el registro y la recuperación de contraseña son flujos simulados; no utilizan un servicio externo de autenticación.
 
 ## Integración con la API
 
-La aplicación utiliza la URL definida en `VITE_API_URL`. Si la variable no está configurada, utiliza por defecto:
+La aplicación utiliza la URL definida en `VITE_API_URL`. Si la variable no está configurada, la dirección predeterminada es:
 
 ```text
 http://localhost:3000/api/v1
@@ -128,7 +128,7 @@ http://localhost:3000/api/v1
 
 El backend debe permitir el origen del frontend mediante la variable `CLIENT_URL`.
 
-Cuando la API no está disponible, los servicios que cuentan con alternativa local utilizan datos de demostración en memoria. Estos datos no constituyen almacenamiento persistente.
+Algunos servicios disponen de datos locales de demostración como alternativa cuando la API no está disponible. Estos datos se mantienen en memoria y no constituyen almacenamiento persistente.
 
 ## Estructura del proyecto
 
@@ -156,5 +156,5 @@ bahia-fix-client/
 - Es un prototipo funcional con datos de demostración.
 - El backend utiliza datos en memoria; no hay conexión a una base de datos persistente.
 - Los datos creados o modificados durante la ejecución pueden perderse al reiniciar los servicios.
-- El registro y la recuperación de contraseña son simulados.
-- Los perfiles y permisos permiten recorrer las vistas correspondientes dentro del prototipo.
+- El registro, la recuperación de contraseña y la autenticación son simulados.
+- Los perfiles permiten probar la disponibilidad de los módulos desde la interfaz.
