@@ -9,6 +9,7 @@ import {
   updateTurno
 } from "../services/turnos.js";
 import "../styles/turnos.css";
+import { downloadPdfReport } from "../utils/pdf-report.js";
 
 const PAGE_SIZE = 10;
 
@@ -149,6 +150,62 @@ function Turnos() {
       cancelled = true;
     };
   }, []);
+
+  async function exportReport() {
+    setError("");
+    setNotice("");
+
+    try {
+      const firstPage = await getTurnos({
+        q: query,
+        page: 1,
+        limit: 100,
+        fecha,
+        estado,
+        clienteId
+      });
+      let records = [...firstPage.items];
+
+      for (let currentPage = 2; currentPage <= firstPage.totalPages; currentPage += 1) {
+        const response = await getTurnos({
+          q: query,
+          page: currentPage,
+          limit: 100,
+          fecha,
+          estado,
+          clienteId
+        });
+        records = records.concat(response.items);
+      }
+
+      const rows = records.map((turno) => {
+        const cliente = clientesMap.get(String(turno.clienteId)) || "Cliente no disponible";
+        const equipo = equiposMap.get(String(turno.equipoId));
+        const equipoLabel = equipo
+          ? `${equipo.tipo} ${equipo.marca} ${equipo.modelo}`
+          : "Equipo no disponible";
+        return [turno.id, cliente, equipoLabel, formatDate(turno.fecha), turno.hora, turno.motivo, turno.procedencia, turno.estado];
+      });
+      const filters = [
+        query ? `Búsqueda: ${query}` : "",
+        fecha ? `Fecha: ${formatDate(fecha)}` : "",
+        estado ? `Estado: ${estado}` : "",
+        clienteId ? `Cliente: ${clientesMap.get(String(clienteId)) || clienteId}` : ""
+      ].filter(Boolean).join(" | ");
+
+      downloadPdfReport(
+        "Reporte de turnos - Bahía Fix",
+        ["ID", "Cliente", "Equipo", "Fecha", "Hora", "Motivo", "Procedencia", "Estado"],
+        rows,
+        "reporte_turnos.pdf",
+        `Generado: ${new Date().toLocaleString("es-AR")} | Registros: ${records.length}${filters ? ` | ${filters}` : ""}`,
+        [0.55, 1.1, 1.55, 0.8, 0.55, 1.65, 1.2, 0.9]
+      );
+      setNotice(`Se descargó el reporte con ${records.length} turnos.`);
+    } catch (err) {
+      setError(err.message || "No se pudo generar el reporte de turnos.");
+    }
+  }
 
   function resetFilters() {
     setQuery("");
@@ -353,13 +410,18 @@ function Turnos() {
             />
           </label>
 
-          <button
-            type="button"
-            className="primary-button"
-            onClick={openCreate}
-          >
-            ＋ Nuevo turno
-          </button>
+          <div className="turnos-toolbar-actions">
+            <button type="button" className="secondary-button" onClick={exportReport} disabled={loading}>
+              Exportar PDF
+            </button>
+            <button
+              type="button"
+              className="primary-button"
+              onClick={openCreate}
+            >
+              ＋ Nuevo turno
+            </button>
+          </div>
         </div>
 
         <div className="turnos-filters">
