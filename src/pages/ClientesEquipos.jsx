@@ -373,7 +373,7 @@ function ClientesEquipos() {
           {isClientes ? <>
             <label>Nombre<input name="nombre" value={form.nombre} onChange={updateField} required maxLength="80" /></label>
             <label>Apellido<input name="apellido" value={form.apellido} onChange={updateField} required maxLength="80" /></label>
-            <label>Teléfono<input name="telefono" value={form.telefono} onChange={updateField} required maxLength="30" /></label>
+            <label>Teléfono<input type="tel" name="telefono" value={form.telefono} onChange={updateField} required minLength="8" maxLength="20" pattern="(?=(?:\\D*\\d){8,15}\\D*$)\\+?[0-9\\s()-]+" title="Ingresá entre 8 y 15 dígitos. Podés usar +, espacios, guiones y paréntesis." /></label>
             <label>Correo electrónico<input type="email" name="email" value={form.email} onChange={updateField} required maxLength="120" /></label>
             <label>Localidad<input name="localidad" value={form.localidad} onChange={updateField} required maxLength="100" /></label>
           </> : <>

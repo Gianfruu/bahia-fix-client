@@ -1,3 +1,4 @@
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   createTurno,
@@ -186,6 +187,7 @@ function Turnos() {
           : "Equipo no disponible";
         return [turno.id, cliente, equipoLabel, formatDate(turno.fecha), turno.hora, turno.motivo, turno.procedencia, turno.estado];
       });
+
       const filters = [
         query ? `Búsqueda: ${query}` : "",
         fecha ? `Fecha: ${formatDate(fecha)}` : "",
@@ -198,8 +200,10 @@ function Turnos() {
         ["ID", "Cliente", "Equipo", "Fecha", "Hora", "Motivo", "Procedencia", "Estado"],
         rows,
         "reporte_turnos.pdf",
-        `Generado: ${new Date().toLocaleString("es-AR")} | Registros: ${records.length}${filters ? ` | ${filters}` : ""}`
+        `Generado: ${new Date().toLocaleString("es-AR")} | Registros: ${records.length}${filters ? ` | ${filters}` : ""}`,
+        [0.55, 1.1, 1.55, 0.8, 0.55, 1.65, 1.2, 0.9]
       );
+
       setNotice(`Se descargó el reporte con ${records.length} turnos.`);
     } catch (err) {
       setError(err.message || "No se pudo generar el reporte de turnos.");

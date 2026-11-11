@@ -1,3 +1,4 @@
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   createReparacion,
@@ -76,11 +77,21 @@ function Reparaciones({ role = "Operador" }) {
     setNotice("");
 
     try {
-      const firstPage = await getReparaciones({ page: 1, limit: 100, q: query, estado: estadoFiltro });
+      const firstPage = await getReparaciones({
+        page: 1,
+        limit: 100,
+        q: query,
+        estado: estadoFiltro
+      });
       let records = [...(firstPage.items || [])];
 
       for (let currentPage = 2; currentPage <= firstPage.totalPages; currentPage += 1) {
-        const response = await getReparaciones({ page: currentPage, limit: 100, q: query, estado: estadoFiltro });
+        const response = await getReparaciones({
+          page: currentPage,
+          limit: 100,
+          q: query,
+          estado: estadoFiltro
+        });
         records = records.concat(response.items || []);
       }
 
@@ -89,20 +100,32 @@ function Reparaciones({ role = "Operador" }) {
         clienteNombre(item.clienteId),
         equipoNombre(item.equipoId),
         item.fechaIngreso,
-        item.motivo,
+        [item.motivo, item.observaciones].filter(Boolean).join(" | "),
         item.diagnostico,
         item.trabajoRealizado,
         item.estado,
-        item.garantia,
+        item.garantia || "A verificar",
         `$${Number(item.total || 0).toLocaleString("es-AR")}`
       ]);
 
       downloadPdfReport(
         "Reporte de reparaciones - Bahía Fix",
-        ["Orden", "Cliente", "Equipo", "Ingreso", "Motivo", "Diagnóstico", "Trabajo realizado", "Estado", "Garantía", "Total"],
+        [
+          "Orden",
+          "Cliente",
+          "Equipo",
+          "Ingreso",
+          "Motivo / observaciones",
+          "Diagnóstico",
+          "Trabajo realizado",
+          "Estado",
+          "Garantía",
+          "Total"
+        ],
         rows,
         "reporte_reparaciones.pdf",
-        `Generado: ${new Date().toLocaleString("es-AR")} | Registros: ${records.length}${query ? ` | Búsqueda: ${query}` : ""}${estadoFiltro ? ` | Estado: ${estadoFiltro}` : ""}`
+        `Generado: ${new Date().toLocaleString("es-AR")} | Registros: ${records.length}${query ? ` | Búsqueda: ${query}` : ""}${estadoFiltro ? ` | Estado: ${estadoFiltro}` : ""}`,
+        [0.5, 1.0, 1.2, 0.8, 1.65, 1.25, 1.35, 1.2, 1.45, 0.55]
       );
       setNotice(`Se descargó el reporte con ${records.length} reparaciones.`);
     } catch (err) {
@@ -156,7 +179,10 @@ function Reparaciones({ role = "Operador" }) {
   function addRepuesto() {
     setForm((current) => ({
       ...current,
-      repuestos: [...current.repuestos, { descripcion: "", cantidad: "1", precio: "0" }]
+      repuestos: [
+        ...current.repuestos,
+        { descripcion: "", cantidad: "1", precio: "0" }
+      ]
     }));
   }
 
